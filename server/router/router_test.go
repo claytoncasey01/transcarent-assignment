@@ -7,6 +7,7 @@ import (
 )
 
 // Make sure we get a new Echo.
+// Probably unecessary but all about that coverage
 func TestNew(t *testing.T) {
 	var i interface{} = New()
 

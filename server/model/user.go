@@ -2,8 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
 )
 
 type userInfo struct {
@@ -25,13 +23,9 @@ func NewUser(id int, name, username, email string) *User {
 	}
 }
 
-func NewUserFromResponse(userResponse *http.Response) (*User, error) {
+func NewUserFromResponse(userResponse []byte) (*User, error) {
 	user := User{}
-	userBody, err := ioutil.ReadAll(userResponse.Body)
-	if err != nil {
-		return nil, err
-	}
-	json.Unmarshal(userBody, &user)
+	json.Unmarshal(userResponse, &user)
 
 	return &user, nil
 }

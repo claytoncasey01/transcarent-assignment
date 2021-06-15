@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/claytoncasey01/transcarent-assignment/model"
+	"github.com/claytoncasey01/transcarent-assignment/util"
 	"github.com/labstack/echo/v4"
 )
 
@@ -46,30 +47,24 @@ func (h *Handler) GetUserPosts(c echo.Context) error {
 	}
 
 	// Get the user
-	userResp, err := http.Get(h.usersResource + "/" + userId)
-	if err != nil {
-		c.Logger().Fatalf(err.Error())
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-	user, err := model.NewUserFromResponse(userResp)
+	// userResp, err := http.Get(h.usersResource + "/" + userId)
+	userResp := make(chan []byte)
+	postsResp := make(chan []byte)
+
+	go util.Fetch(h.usersResource+"/"+userId, userResp, c)
+	go util.Fetch(h.postsResource+"?userId="+userId, postsResp, c)
+
+	user, err := model.NewUserFromResponse(<-userResp)
 	if err != nil {
 		c.Logger().Fatalf(err.Error())
 		return c.JSON(http.StatusInternalServerError, "Unable to process your request at this time")
 	}
 
 	// Get the posts
-	postsResp, err := http.Get(h.postsResource + "?userId=" + userId)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
-	}
-	posts, err := model.NewPostsSliceFromResponse(postsResp)
+	posts, err := model.NewPostsSliceFromResponse(<-postsResp)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, newUserPostsResponse(user, posts))
-}
-
-func (h *Handler) Test(c echo.Context) error {
-	return c.String(http.StatusOK, "{}")
 }

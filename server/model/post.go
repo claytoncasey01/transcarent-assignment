@@ -2,8 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
 )
 
 type Post struct {
@@ -22,13 +20,9 @@ func NewPost(userId, id int, title, body string) *Post {
 	}
 }
 
-func NewPostsSliceFromResponse(postResonse *http.Response) ([]*Post, error) {
+func NewPostsSliceFromResponse(postResonse []byte) ([]*Post, error) {
 	posts := make([]*Post, 0)
-	postBody, err := ioutil.ReadAll(postResonse.Body)
-	if err != nil {
-		return nil, err
-	}
-	json.Unmarshal(postBody, &posts)
+	json.Unmarshal(postResonse, &posts)
 
 	return posts, nil
 }

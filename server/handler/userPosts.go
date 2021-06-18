@@ -37,13 +37,13 @@ func (h *Handler) GetUserPosts(c echo.Context) error {
 	parsedUserId, err := strconv.Atoi(userId)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "UserId must be an integer")
+		return echo.NewHTTPError(http.StatusBadRequest, "UserId must be an integer")
 	}
 
 	// Clamp the value to valid userIds, probably not necessary but might
 	// as well handle it since we know the bounds
 	if parsedUserId < 1 || parsedUserId > 10 {
-		return c.JSON(http.StatusBadRequest, "Invalid userId supplied, must be between 1 and 10")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid userId supplied, must be between 1 and 10")
 	}
 
 	// Get the user
@@ -57,13 +57,13 @@ func (h *Handler) GetUserPosts(c echo.Context) error {
 	user, err := model.NewUserFromResponse(<-userResp)
 	if err != nil {
 		c.Logger().Fatalf(err.Error())
-		return c.JSON(http.StatusInternalServerError, "Unable to process your request at this time")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Unable to process your request at this time")
 	}
 
 	// Get the posts
 	posts, err := model.NewPostsSliceFromResponse(<-postsResp)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return c.JSON(http.StatusOK, newUserPostsResponse(user, posts))
